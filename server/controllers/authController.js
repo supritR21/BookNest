@@ -9,7 +9,7 @@ import { sendToken } from "../utils/sendToken.js";
 export const register = catchAsyncErrors(async (req, res, next) => {
     try {
         const {name, email, password} = req.body;
-
+       console.log("Working...")
         if(!name || !email || !password) {
             return next(new ErrorHandler("Please enter all the fields.", 400));
         }
@@ -44,6 +44,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 
 export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
     const {email, otp} = req.body;
+    console.log(req.body);
     if(!email || !otp) {
         return next(new ErrorHandler("Email or OTP is missing.", 400));
     }
@@ -91,4 +92,35 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
     } catch(error) {
         return next(new ErrorHandler("Internal server error.", 500));
     }
+});
+
+export const login = catchAsyncErrors(async (req, res, next) => {
+    const {email, password} = req.body;
+    console.log("Login Working");
+    if(!email || !password) {
+        return next(new ErrorHandler("Please enter all the fields.", 400));
+    }
+    try {
+        const user = await User.findOne({email, accountVerified: true}).select("+password");
+        if(!user) {
+            return next(new ErrorHandler("Invalid email or password.", 401));
+        }
+        const isPasswordMatched = await bcrypt.compare(password, user.password);
+        if(!isPasswordMatched) {
+            return next(new ErrorHandler("Invalid email or password.", 401));
+        }
+        sendToken(user, 200, "Login successful.", res);
+    } catch(error) {
+        return next(new ErrorHandler("Internal server error.", 500));
+    }
+});
+
+export const logout = catchAsyncErrors(async (req, res, next) => {
+    res.status(200).cookie("token", "", {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+    }).json({
+        success: true,
+        message: "Logged out successfully.",
+    });
 });
