@@ -87,6 +87,7 @@ userSchema.methods.generateVerificationCode = async function () {
     const verificationCode = generateRandomFiveDigitNumber();
     this.verificationCode = verificationCode;
     this.verificationCodeExpires = Date.now() + 15*60*1000;
+    //await this.save();
     return verificationCode;
 };
 
@@ -96,7 +97,7 @@ userSchema.methods.generateToken = function () {
     });
 };
 
-userSchema.methods.getResetPasswordToken = function () {
+userSchema.methods.getResetPasswordToken = async function () {
     const resetToken = crypto.randomBytes(20).toString("hex");
     this.resetPasswordToken = crypto
         .createHash("sha256")
@@ -104,6 +105,7 @@ userSchema.methods.getResetPasswordToken = function () {
         .digest("hex");
 
     this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+    await this.save({ validateBeforeSave: false });
     return resetToken;
 }
 
