@@ -36,7 +36,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
             email,
             password: hashedPassword,
         });
-        const verificationCode = await User.generateVerificationCode();
+        const verificationCode = await user.generateVerificationCode();
         await user.save();
         sendVerificationCode(verificationCode, email, res);
     } catch (error) {
@@ -137,8 +137,8 @@ export const getUser = catchAsyncErrors(async (req, res, next) => {
         user,
     });
 });
-
 export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
+    
     if(!req.body.email) {
         return next(new ErrorHandler("Email is required.", 400));
     }
@@ -149,18 +149,24 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
     if(!user) {
         return next(new ErrorHandler("Invalid email.", 400));
     }
-    const resetToken = User.getResetPasswordToken();
+    
+    const resetToken = await user.getResetPasswordToken();
+    
     await user.save({validateBeforeSave: false});
     const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
-
-    const message = generateForgotPasswordEmailTemplate(resetPasswordUrl);
-
     try {
+        const message = generateForgotPasswordEmailTemplate(resetPasswordUrl);
         await sendEmail({
             email: user.email,
             subject: "Library Management System - Password Recovery",
             message,
         })
+
+        res.status(200).json({
+            success: true,
+            message: `Password reset ${user.email} sent.`,
+        });
+        
     } catch(error) {
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
@@ -171,23 +177,25 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const resetPassword = catchAsyncErrors(async (req, res, next) => {
-    const {token} = req.params;
+    //const {token} = req.params;
     const resetPasswordToken = crypto
         .createHash("sha256")
-        .update(token)
+        .update(req.params.token)
         .digest("hex");
 
+    
     const user = await User.findOne({
         resetPasswordToken,
         resetPasswordExpire: {$gt: Date.now()},
     });
+    
     if(!user) {
+        
         return next(
-            new ErrorHandler("Reset password token is invalid or has expired.",
-                400
-            )
+            new ErrorHandler("Reset password token is invalid or has expired.", 400)
         );
     }
+    console.log("4");
     if(
         req.body.password !== req.body.confirmPassword
     ) {
@@ -195,8 +203,7 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
     }
     
     if(
-        req.body.password.length < 8 || req.body.password.length > 15 ||
-        req.body.confirmPassword.length < 8 || req.body.confirmPassword.length > 15
+        req.body.password.length < 8 || req.body.password.length > 15
     ) {
         return next(new ErrorHandler("Password must be between 8 and 15 characters.", 400));
     }
@@ -211,7 +218,6 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
     sendToken(user, 200, "Password reset successfully.", res);
     
 });
-
 export const updatePassword = catchAsyncErrors(async (req, res, next) => {
     const user = await User.findById(req.user._id).select("+password");
     const {currentPassword, newPassword, confirmNewPassword} = req.body;
