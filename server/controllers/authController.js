@@ -11,7 +11,7 @@ import { generateForgotPasswordEmailTemplate } from "../utils/emailTemplates.js"
 export const register = catchAsyncErrors(async (req, res, next) => {
     try {
         const {name, email, password} = req.body;
-       console.log("Working...")
+        console.log("Working Register");
         if(!name || !email || !password) {
             return next(new ErrorHandler("Please enter all the fields.", 400));
         }
@@ -36,7 +36,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
             email,
             password: hashedPassword,
         });
-        const verificationCode = user.generateVerificationCode();
+        const verificationCode = await User.generateVerificationCode();
         await user.save();
         sendVerificationCode(verificationCode, email, res);
     } catch (error) {
@@ -45,6 +45,8 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
+    console.log(User);
+    console.log("Verify OTP Working");
     const {email, otp} = req.body;
     console.log(req.body);
     if(!email || !otp) {
@@ -118,6 +120,7 @@ export const login = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const logout = catchAsyncErrors(async (req, res, next) => {
+    console.log("Logout Working");
     res.status(200).cookie("token", "", {
         expires: new Date(Date.now()),
         httpOnly: true,
@@ -128,7 +131,7 @@ export const logout = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const getUser = catchAsyncErrors(async (req, res, next) => {
-    const user = req.user;
+    const user = req.User;
     res.status(200).json({
         success: true,
         user,
@@ -146,7 +149,7 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
     if(!user) {
         return next(new ErrorHandler("Invalid email.", 400));
     }
-    const resetToken = user.getResetPasswordToken();
+    const resetToken = User.getResetPasswordToken();
     await user.save({validateBeforeSave: false});
     const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
@@ -239,6 +242,6 @@ export const updatePassword = catchAsyncErrors(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        message: "Password updated."
+        message: "Password updated"
     })
 });
