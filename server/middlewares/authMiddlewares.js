@@ -16,19 +16,6 @@ export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
   next();
 });
 
-// export const isAuthorized = (...roles) => {  
-//   return(req, res, next) => {
-//     if (!roles.includes(req.user.role)) {
-//       console.log("not allowed");
-      
-//       return next(new ErrorHandler(`User with role ${req.user.role} is not allowed to access this resource.`, 400));
-//     }
-//     console.log(req.user.role);
-    
-//     next();
-//   };
-// }
-
 export const isAuthorized = (...roles) => {  
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
@@ -39,6 +26,8 @@ export const isAuthorized = (...roles) => {
         message: `User with role ${req.user.role} is not allowed to access this resource.`,
       });
     }
+    console.log("Authorized");
+    
     next();
   };
 };
