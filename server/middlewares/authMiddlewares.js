@@ -12,21 +12,33 @@ export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
   }
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);  
   req.user = await User.findById(decoded.id);
+  
   next();
 });
 
-export const isAuthorized = (...roles) => {
-  
+// export const isAuthorized = (...roles) => {  
+//   return(req, res, next) => {
+//     if (!roles.includes(req.user.role)) {
+//       console.log("not allowed");
+      
+//       return next(new ErrorHandler(`User with role ${req.user.role} is not allowed to access this resource.`, 400));
+//     }
+//     console.log(req.user.role);
+    
+//     next();
+//   };
+// }
+
+export const isAuthorized = (...roles) => {  
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return next(
-        new ErrorHandler(
-          `Role ${req.user.role} is not allowed to access this resource.`,
-          400
-        )
-      );
+      // console.log("not allowed");
+      // return next(new ErrorHandler(`User with role ${req.user.role} is not allowed to access this resource.`, 403));
+      return res.status(403).json({
+        success: false,
+        message: `User with role ${req.user.role} is not allowed to access this resource.`,
+      });
     }
-    console.log("Checking authorization...");
     next();
   };
-}
+};
