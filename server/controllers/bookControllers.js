@@ -42,11 +42,11 @@ export const deleteBook = catchAsyncErrors(async (req, res, next) => {
   
   if (!book) {
     console.log("Book not found.");
-    // return next(new ErrorHandler("Book not found.", 404));
-    return res.status(404).json({
-      success: false,
-      message: "Book not found.",
-    });
+    return next(new ErrorHandler("Book not found.", 404));
+    // return res.status(404).json({
+    //   success: false,
+    //   message: "Book not found.",
+    // });
   }
   console.log("Deleting book...");
   

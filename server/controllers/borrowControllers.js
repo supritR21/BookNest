@@ -12,29 +12,29 @@ export const recordBorrowedBook = catchAsyncErrors(async (req, res, next) => {
   const book = await Book.findById(id);
 
   if (!book) {
-    // return next(new ErrorHandler("Book not found", 404));
-    return res.status(404).json({
-      success: false,
-      message: "Book not found",
-    });
+    return next(new ErrorHandler("Book not found", 404));
+    // return res.status(404).json({
+    //   success: false,
+    //   message: "Book not found",
+    // });
   }
 
   // const user = await User.findOne({ email });
   const user = await User.findOne({ email, role: "User", accountVerified: true });
   if (!user) {
-    // return next(new ErrorHandler("User not found", 404));
-    return res.status(404).json({
-      success: false,
-      message: "User not found",
-    });
+    return next(new ErrorHandler("User not found", 404));
+    // return res.status(404).json({
+    //   success: false,
+    //   message: "User not found",
+    // });
   }
 
   if(book.quantity === 0) {
-    // return next(new ErrorHandler("Book not available", 400));
-    return res.status(400).json({
-      success: false,
-      message: "Book not available",
-    });
+    return next(new ErrorHandler("Book not available", 400));
+    // return res.status(400).json({
+    //   success: false,
+    //   message: "Book not available",
+    // });
   }
 
   // console.log("book.quantity", book.quantity);
@@ -45,11 +45,11 @@ export const recordBorrowedBook = catchAsyncErrors(async (req, res, next) => {
   
 
   if (isAlreadyBorrowed) {
-    // return next(new ErrorHandler("Book already borrowed", 400));
-    return res.status(400).json({
-      success: false,
-      message: "Book already borrowed",
-    });
+    return next(new ErrorHandler("Book already borrowed", 400));
+    // return res.status(400).json({
+    //   success: false,
+    //   message: "Book already borrowed",
+    // });
   }
   book.quantity -= 1;
   book.availability = book.quantity > 0;
@@ -107,22 +107,22 @@ export const returnBorrowedBook = catchAsyncErrors(async (req, res, next) => {
 
   const user = await User.findOne({ email, role: "User", accountVerified: true });
   if (!user) {
-    // return next(new ErrorHandler("User not found", 404));
-    return res.status(404).json({
-      success: false,
-      message: "User not found",
-    });
+    return next(new ErrorHandler("User not found", 404));
+    // return res.status(404).json({
+    //   success: false,
+    //   message: "User not found",
+    // });
   }
 
   const borrowedBook = user.borrowedBooks.find(
     (b) => b.bookId.toString() === bookId && b.returned === false
   );
   if (!borrowedBook) {
-    // return next(new ErrorHandler("You have not borrowed this book.", 400));
-    return res.status(400).json({
-      success: false,
-      message: "You have not borrowed this book.",
-    });
+    return next(new ErrorHandler("You have not borrowed this book.", 400));
+    // return res.status(400).json({
+    //   success: false,
+    //   message: "You have not borrowed this book.",
+    // });
   }
 
   borrowedBook.returned = true;  
@@ -138,11 +138,11 @@ export const returnBorrowedBook = catchAsyncErrors(async (req, res, next) => {
   });
 
   if(!borrow) {
-    // return next(new ErrorHandler("You have not borrowed this book", 404));
-    return res.status(404).json({
-      success: false,
-      message: "Borrow record not found",
-    });
+    return next(new ErrorHandler("You have not borrowed this book", 404));
+    // return res.status(404).json({
+    //   success: false,
+    //   message: "Borrow record not found",
+    // });
   }
 
   borrow.returnDate = new Date();
