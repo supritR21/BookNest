@@ -108,10 +108,6 @@ export const returnBorrowedBook = catchAsyncErrors(async (req, res, next) => {
   const user = await User.findOne({ email, role: "User", accountVerified: true });
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
-    // return res.status(404).json({
-    //   success: false,
-    //   message: "User not found",
-    // });
   }
 
   const borrowedBook = user.borrowedBooks.find(
@@ -119,10 +115,6 @@ export const returnBorrowedBook = catchAsyncErrors(async (req, res, next) => {
   );
   if (!borrowedBook) {
     return next(new ErrorHandler("You have not borrowed this book.", 400));
-    // return res.status(400).json({
-    //   success: false,
-    //   message: "You have not borrowed this book.",
-    // });
   }
 
   borrowedBook.returned = true;  
@@ -139,10 +131,6 @@ export const returnBorrowedBook = catchAsyncErrors(async (req, res, next) => {
 
   if(!borrow) {
     return next(new ErrorHandler("You have not borrowed this book", 404));
-    // return res.status(404).json({
-    //   success: false,
-    //   message: "Borrow record not found",
-    // });
   }
 
   borrow.returnDate = new Date();
