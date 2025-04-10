@@ -51,6 +51,10 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
     console.log(req.body);
     if(!email || !otp) {
         return next(new ErrorHandler("Email or OTP is missing.", 400));
+        // return res.status(400).json({
+        //     success: false,
+        //     message: "Email or OTP is missing.",
+        // });
     }
     try {
         const userAllEntries = await User.find({
@@ -60,6 +64,10 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
 
         if(userAllEntries === 0) {
             return next(new ErrorHandler("User not found.", 404));
+            // return res.status(404).json({
+            //     success: false,
+            //     message: "User not found.",
+            // });
         }
 
         let user;
@@ -77,6 +85,10 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
 
         if(user.verificationCode.toString() !== otp.toString()) {
             return next(new ErrorHandler("Invalid OTP.", 400));
+            // return res.status(400).json({
+            //     success: false,
+            //     message: "Invalid OTP.",
+            // });
         }
         const currentTime = Date.now();
 
@@ -86,6 +98,10 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
 
         if(currentTime > verificationCodeExpires) {
             return next(new ErrorHandler("OTP expired.", 400));
+            // return res.status(400).json({
+            //     success: false,
+            //     message: "OTP expired.",
+            // });
         }
         user.accountVerified = true;
         user.verificationCode = null;
@@ -95,6 +111,10 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
         sendToken(user, 200, "Account Verified.", res);
     } catch(error) {
         return next(new ErrorHandler("Internal server error.", 500));
+        // return res.status(500).json({
+        //     success: false,
+        //     message: "Internal server error.",
+        // });
     }
 });
 
@@ -103,20 +123,38 @@ export const login = catchAsyncErrors(async (req, res, next) => {
     console.log("Login Working");
     if(!email || !password) {
         return next(new ErrorHandler("Please enter all the fields.", 400));
+        // return res.status(400).json({
+        //     success: false,
+        //     message: "Please enter all the fields.",
+        // });
     }
     try {
         const user = await User.findOne({email, accountVerified: true}).select("+password");
         if(!user) {
             return next(new ErrorHandler("Invalid email or password.", 401));
+            // return res.status(401).json({
+            //     success: false,
+            //     message: "Invalid email or password.",
+            // });
         }
         const isPasswordMatched = await bcrypt.compare(password, user.password);
         if(!isPasswordMatched) {
             return next(new ErrorHandler("Invalid email or password.", 401));
+            // return res.status(401).json({
+            //     success: false,
+            //     message: "Invalid email or password.",
+            // });
         }
         sendToken(user, 200, "Login successful.", res);
     } catch(error) {
         return next(new ErrorHandler("Internal server error.", 500));
+        // return res.status(500).json({
+        //     success: false,
+        //     message: "Internal server error.",
+        // });
     }
+    console.log("Login Working");
+
 });
 
 export const logout = catchAsyncErrors(async (req, res, next) => {
