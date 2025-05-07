@@ -44,7 +44,7 @@ export const addPYQ = (pyqData) => async (dispatch) => {
   dispatch(pyqSlice.actions.addPYQRequest());
   try {
     const { data } = await axios.post(
-      "https://byteverse-nandininjas.onrender.com/api/v1/pyq/admin/add",
+      "http://localhost:3500/api/v1/pyq/admin/add",
       pyqData,
       { withCredentials: true }
     );
