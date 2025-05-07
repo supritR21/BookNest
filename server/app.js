@@ -11,6 +11,8 @@ import userRouter from "./routes/userRouter.js"
 import expressFileupload from "express-fileupload"
 import { notifyUsers } from './services/notifyUsers.js';
 import { removeUnverifiedAccounts } from './services/removeUnverifiedAccounts.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const app = express();
 
