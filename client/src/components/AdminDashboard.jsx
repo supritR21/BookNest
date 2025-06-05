@@ -168,7 +168,7 @@ const AdminDashboard = () => {
                 "Through every borrowed book begins a journey of wisdom, nurturing the soul and shaping the path to excellence and inner refinement."
               </h4>
               <p className="text-gray-700 text-sm sm:text-lg absolute right-[35px] sm:right-[78px] bottom-[10px]">
-                ~ NandiNinjas
+                ~ Suprit Raj
               </p>
             </div>
           </div>
