@@ -187,19 +187,48 @@ export const otpVerification = (email, otp) => async (dispatch) => {
 
 export const login = (data) => async (dispatch) => {
   dispatch(authSlice.actions.loginRequest());
-  await axios
-    .post(`${BASE_URL}/api/v1/auth/login`, data, {
+  
+  try {
+    // Use HTTP for local development, HTTPS for production
+    const url = `${BASE_URL}/api/v1/auth/login`.replace('https://', 'http://');
+    
+    const response = await axios.post(url, data, {
       withCredentials: true,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
-    })
-    .then((res) => {
-      dispatch(authSlice.actions.loginSuccess(res.data));
-    })
-    .catch((error) => {
-      dispatch(authSlice.actions.loginFailed(error.response.data.message));
+      // Important for local development
+      httpsAgent: process.env.NODE_ENV === 'development' 
+        ? new (require('https').Agent)({ rejectUnauthorized: false })
+        : undefined
     });
+
+    dispatch(authSlice.actions.loginSuccess(response.data));
+
+  } catch (error) {
+    // Robust error handling
+    let errorMessage = "Login failed. Please try again.";
+    
+    if (error.code === 'ERR_SSL_PROTOCOL_ERROR') {
+      errorMessage = "Secure connection failed. Try again later.";
+    } else if (error.response) {
+      errorMessage = error.response.data?.message || 
+                   `Server error: ${error.response.status}`;
+    } else if (error.request) {
+      errorMessage = "No response from server. Check your connection.";
+    }
+
+    dispatch(authSlice.actions.loginFailed(errorMessage));
+    
+    // Development logging
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Login error details:", {
+        config: error.config,
+        response: error.response?.data,
+        message: error.message
+      });
+    }
+  }
 };
 
 export const logout = () => async (dispatch) => {
