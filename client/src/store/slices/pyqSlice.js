@@ -1,3 +1,4 @@
+const BASE_URL = import.meta.env.VITE_API_URL;
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -22,7 +23,7 @@ const pyqSlice = createSlice({
 export const fetchAllPYQs = () => async (dispatch) => {
   dispatch(pyqSlice.actions.fetchPYQsRequest());
   try {
-    const { data } = await axios.get("http://localhost:3500/v1/pyq/all", { withCredentials: true });
+    const { data } = await axios.get(`${BASE_URL}/v1/pyq/all`, { withCredentials: true });
     dispatch(pyqSlice.actions.fetchPYQsSuccess(data.pyqs));
   } catch (error) {
     dispatch(pyqSlice.actions.fetchPYQsFailed(error.response.data.message));
@@ -44,7 +45,7 @@ export const addPYQ = (pyqData) => async (dispatch) => {
   dispatch(pyqSlice.actions.addPYQRequest());
   try {
     const { data } = await axios.post(
-      "http://localhost:3500/api/v1/pyq/admin/add",
+      `${BASE_URL}/api/v1/pyq/admin/add`,
       pyqData,
       { withCredentials: true }
     );

@@ -1,3 +1,4 @@
+const BASE_URL = import.meta.env.VITE_API_URL;
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toggleAddBookPopup } from "./popUpSlice";
@@ -50,7 +51,7 @@ const bookSlice = createSlice({
 export const fetchAllBooks = () => async (dispatch) => {
   dispatch(bookSlice.actions.fetchBooksRequest());
   await axios
-    .get("http://localhost:3500/api/v1/book/all", {
+    .get(`${BASE_URL}/api/v1/book/all`, {
       withCredentials: true,
     })
     .then((res) => {
@@ -64,7 +65,7 @@ export const fetchAllBooks = () => async (dispatch) => {
 export const addBook = (data) => async (dispatch) => {
   dispatch(bookSlice.actions.addBookRequest());
   await axios
-    .post("http://localhost:3500/api/v1/book/admin/add", data, {
+    .post(`${BASE_URL}/api/v1/book/admin/add`, data, {
       withCredentials: true,
       headers: {
         "Content-Type": "application/json",
