@@ -21,16 +21,7 @@ export const app = express();
 config({ path: "config/config.env" });
 
 
-if (process.env.NODE_ENV === 'production') {
-  app.enable('trust proxy');
-  app.use((req, res, next) => {
-    if (req.secure) {
-      next();
-    } else {
-      res.redirect(`https://${req.headers.host}${req.url}`);
-    }
-  });
-}
+
 
 // =====================
 // Security Middlewares
