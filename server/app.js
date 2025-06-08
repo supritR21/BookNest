@@ -20,17 +20,10 @@ export const app = express();
 // Configurations
 config({ path: "config/config.env" });
 
-
-
-
 // =====================
 // Security Middlewares
 // =====================
-app.use(helmet.hsts({
-  maxAge: 31536000, // 1 year
-  includeSubDomains: true,
-  preload: true
-}));
+app.use(helmet());
 app.use(cookieParser());
 
 // Enhanced CORS Configuration
@@ -38,7 +31,8 @@ const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
       process.env.FRONTEND_URL,
-      'https://booknest1.onrender.com'
+      'https://booknest1.onrender.com',
+      'http://booknest1.onrender.com'
     ];
     
     // Allow requests with no origin (like mobile apps or curl requests)
