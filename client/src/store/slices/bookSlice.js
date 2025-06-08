@@ -1,8 +1,19 @@
-const BASE_URL = import.meta.env.VITE_API_URL;
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toggleAddBookPopup } from "./popUpSlice";
 import { toast } from "react-toastify";
+
+// Use the same base URL configuration as authSlice
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || '/api';
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 const bookSlice = createSlice({
   name: "book",
@@ -50,36 +61,49 @@ const bookSlice = createSlice({
 
 export const fetchAllBooks = () => async (dispatch) => {
   dispatch(bookSlice.actions.fetchBooksRequest());
-  await axios
-    .get(`${BASE_URL}/api/v1/book/all`, {
-      withCredentials: true,
-    })
-    .then((res) => {
-      dispatch(bookSlice.actions.fetchBooksSuccess(res.data.books));
-    })
-    .catch((err) => {
-      dispatch(bookSlice.actions.fetchBooksFailed(err.response.data.message));
-    });
+  try {
+    const response = await api.get('/v1/book/all');
+    dispatch(bookSlice.actions.fetchBooksSuccess(response.data.books));
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 
+                        'Failed to fetch books';
+    dispatch(bookSlice.actions.fetchBooksFailed(errorMessage));
+    
+    // Show error toast only if it's not a 401 (unauthorized)
+    if (error.response?.status !== 401) {
+      toast.error(errorMessage);
+    }
+  }
 };
 
 export const addBook = (data) => async (dispatch) => {
   dispatch(bookSlice.actions.addBookRequest());
-  await axios
-    .post(`${BASE_URL}/api/v1/book/admin/add`, data, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    .then((res) => {
-      bookSlice.actions.addBookSuccess(res.data.message);
-      toast.success(res.data.message);
-      dispatch(toggleAddBookPopup());
-      dispatch(fetchAllBooks());
-    })
-    .catch((err) => {
-      dispatch(bookSlice.actions.addBookFailed(err.response.data.message));
-    });
+  try {
+    const response = await api.post('/v1/book/admin/add', data);
+    
+    dispatch(bookSlice.actions.addBookSuccess(response.data.message));
+    toast.success(response.data.message);
+    dispatch(toggleAddBookPopup());
+    
+    // Refresh the book list after successful addition
+    await dispatch(fetchAllBooks());
+    
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 
+                        'Failed to add book';
+    
+    dispatch(bookSlice.actions.addBookFailed(errorMessage));
+    toast.error(errorMessage);
+    
+    // Development-only logging
+    if (import.meta.env.DEV) {
+      console.error("Add book error:", {
+        error: error.message,
+        response: error.response?.data,
+        config: error.config
+      });
+    }
+  }
 };
 
 export const resetBookSlice = () => (dispatch) => {

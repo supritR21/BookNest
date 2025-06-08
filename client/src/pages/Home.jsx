@@ -73,7 +73,7 @@ const Home = () => {
               if (user.role === "User") {
                 return <MyPYQs />;
               }
-              break
+              break;
 
 
             default:

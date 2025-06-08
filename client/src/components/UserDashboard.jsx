@@ -94,7 +94,7 @@ const UserDashboard = () => {
                 "Through every borrowed book begins a journey of wisdom, nurturing the soul and shaping the path to excellence and inner refinement."
               </h4>
               <p className="text-gray-600 text-sm absolute bottom-4 right-6">
-                ~ NandiNinjas
+                ~ Suprit Raj
               </p>
             </div>
           </div>
