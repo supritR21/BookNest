@@ -1,15 +1,6 @@
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || '/api';
+const BASE_URL = import.meta.env.VITE_API_URL;
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-
-// Create axios instance with default config
-const api = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 const authSlice = createSlice({
   name: "auth",
@@ -21,60 +12,220 @@ const authSlice = createSlice({
     isAuthenticated: false,
   },
   reducers: {
-    // ... (keep all your existing reducers exactly the same)
-    // No changes needed to the reducer definitions
+    registerRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    registerSuccess(state, action) {
+      state.loading = false;
+      state.message = action.payload.message;
+    },
+    registerFailed(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    otpVerificationRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    otpVerificationSuccess(state, action) {
+      state.loading = false;
+      state.message = action.payload.message;
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
+    },
+    otpVerificationFailed(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    loginRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    loginSuccess(state, action) {
+      state.loading = false;
+      state.message = action.payload.message;
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
+    },
+    loginFailed(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    logoutRequest(state) {
+      state.loading = true;
+      state.message = null;
+      state.error = null;
+    },
+    logoutSuccess(state, action) {
+      state.loading = false;
+      state.message = action.payload;
+      state.isAuthenticated = false;
+      state.user = null;
+    },
+    logoutFailed(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+      state.message = null;
+    },
+    getUserRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    getUserSuccess(state, action) {
+      state.loading = false;
+      state.user = action.payload.user;
+      state.isAuthenticated = true;
+    },
+    getUserFailed(state) {
+      state.loading = false;
+      state.user = null;
+      state.isAuthenticated = false;
+    },
+
+    forgotPasswordRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    forgotPasswordSuccess(state, action) {
+      state.loading = false;
+      state.message = action.payload.message;
+    },
+    forgotPasswordFailed(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    resetPasswordRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    resetPasswordSuccess(state, action) {
+      state.loading = false;
+      state.message = action.payload.message;
+      state.user = action.payload.user;
+      state.isAuthenticated = true;
+    },
+    resetPasswordFailed(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    updatePasswordRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    updatePasswordSuccess(state, action) {
+      state.loading = false;
+      state.message = action.payload;
+    },
+    updatePasswordFailed(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    resetAuthSlice(state) {
+      state.error = null;
+      state.loading = false;
+      state.message = null;
+      state.user = state.user;
+      state.isAuthenticated = state.isAuthenticated;
+    },
   },
 });
 
-// Action creators with improved error handling
+export const resetAuthSlice = () => (dispatch) => {
+  dispatch(authSlice.actions.resetAuthSlice());
+};
+
 export const register = (data) => async (dispatch) => {
   dispatch(authSlice.actions.registerRequest());
-  try {
-    const response = await api.post('/v1/auth/register', data);
-    dispatch(authSlice.actions.registerSuccess(response.data));
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 
-                        error.message || 
-                        'Registration failed';
-    dispatch(authSlice.actions.registerFailed(errorMessage));
-  }
+  await axios
+    .post(`${BASE_URL}/api/v1/auth/register`, data, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res) => {
+      dispatch(authSlice.actions.registerSuccess(res.data));
+    })
+    .catch((error) => {
+      dispatch(authSlice.actions.registerFailed(error.response.data.message));
+    });
 };
 
 export const otpVerification = (email, otp) => async (dispatch) => {
   dispatch(authSlice.actions.otpVerificationRequest());
-  try {
-    const response = await api.post('/v1/auth/verify-otp', { email, otp });
-    dispatch(authSlice.actions.otpVerificationSuccess(response.data));
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 
-                        'OTP verification failed';
-    dispatch(authSlice.actions.otpVerificationFailed(errorMessage));
-  }
+  await axios
+    .post(
+      `${BASE_URL}/api/v1/auth/verify-otp`,
+      { email, otp },
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((res) => {
+      dispatch(authSlice.actions.otpVerificationSuccess(res.data));
+    })
+    .catch((error) => {
+      dispatch(
+        authSlice.actions.otpVerificationFailed(error.response.data.message)
+      );
+    });
 };
 
 export const login = (data) => async (dispatch) => {
   dispatch(authSlice.actions.loginRequest());
+  
   try {
-    const response = await api.post('/v1/auth/login', data);
-    dispatch(authSlice.actions.loginSuccess(response.data));
-  } catch (error) {
-    let errorMessage = "Login failed";
+    // Use HTTP for local development, HTTPS for production
+    const url = `${BASE_URL}/api/v1/auth/login`.replace('https://', 'http://');
     
-    if (error.code === 'ERR_NETWORK') {
-      errorMessage = "Network error - please check your connection";
+    const response = await axios.post(url, data, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      // Important for local development
+      httpsAgent: process.env.NODE_ENV === 'development' 
+        ? new (require('https').Agent)({ rejectUnauthorized: false })
+        : undefined
+    });
+
+    dispatch(authSlice.actions.loginSuccess(response.data));
+
+  } catch (error) {
+    // Robust error handling
+    let errorMessage = "Login failed. Please try again.";
+    
+    if (error.code === 'ERR_SSL_PROTOCOL_ERROR') {
+      errorMessage = "Secure connection failed. Try again later.";
     } else if (error.response) {
       errorMessage = error.response.data?.message || 
-                   `Error: ${error.response.status}`;
+                   `Server error: ${error.response.status}`;
+    } else if (error.request) {
+      errorMessage = "No response from server. Check your connection.";
     }
-    
+
     dispatch(authSlice.actions.loginFailed(errorMessage));
     
-    // Development-only logging
-    if (import.meta.env.DEV) {
+    // Development logging
+    if (process.env.NODE_ENV === 'development') {
       console.error("Login error details:", {
-        error: error.message,
+        config: error.config,
         response: error.response?.data,
-        config: error.config
+        message: error.message
       });
     }
   }
@@ -82,63 +233,92 @@ export const login = (data) => async (dispatch) => {
 
 export const logout = () => async (dispatch) => {
   dispatch(authSlice.actions.logoutRequest());
-  try {
-    const response = await api.get('/v1/auth/logout');
-    dispatch(authSlice.actions.logoutSuccess(response.data.message));
-    dispatch(authSlice.actions.resetAuthSlice());
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 
-                        'Logout failed';
-    dispatch(authSlice.actions.logoutFailed(errorMessage));
-  }
+  await axios
+    .get(`${BASE_URL}/api/v1/auth/logout`, {
+      withCredentials: true,
+    })
+    .then((res) => {
+      dispatch(authSlice.actions.logoutSuccess(res.data.message));
+      dispatch(authSlice.actions.resetAuthSlice());
+    })
+    .catch((error) => {
+      dispatch(authSlice.actions.logoutFailed(error.response.data.message));
+    });
 };
 
 export const getUser = () => async (dispatch) => {
   dispatch(authSlice.actions.getUserRequest());
-  try {
-    const response = await api.get('/v1/auth/me');
-    dispatch(authSlice.actions.getUserSuccess(response.data));
-  } catch (error) {
-    dispatch(authSlice.actions.getUserFailed());
-  }
+  await axios
+    .get(`${BASE_URL}/api/v1/auth/me`, {
+      withCredentials: true,
+    })
+    .then((res) => {
+      dispatch(authSlice.actions.getUserSuccess(res.data));
+    })
+    .catch((error) => {
+      dispatch(authSlice.actions.getUserFailed(error.response.data.message));
+    });
 };
 
 export const forgotPassword = (email) => async (dispatch) => {
   dispatch(authSlice.actions.forgotPasswordRequest());
-  try {
-    const response = await api.post('/v1/auth/password/forgot', { email });
-    dispatch(authSlice.actions.forgotPasswordSuccess(response.data));
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 
-                        'Password reset request failed';
-    dispatch(authSlice.actions.forgotPasswordFailed(errorMessage));
-  }
+  await axios
+    .post(
+      `${BASE_URL}/api/v1/auth/password/forgot`,
+      { email },
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((res) => {
+      dispatch(authSlice.actions.forgotPasswordSuccess(res.data));
+    })
+    .catch((error) => {
+      dispatch(
+        authSlice.actions.forgotPasswordFailed(error.response.data.message)
+      );
+    });
 };
 
 export const resetPassword = (data, token) => async (dispatch) => {
   dispatch(authSlice.actions.resetPasswordRequest());
-  try {
-    const response = await api.put(`/v1/auth/password/reset/${token}`, data);
-    dispatch(authSlice.actions.resetPasswordSuccess(response.data));
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 
-                        'Password reset failed';
-    dispatch(authSlice.actions.resetPasswordFailed(errorMessage));
-  }
+  await axios
+    .put(`${BASE_URL}/api/v1/auth/password/reset/${token}`, data, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res) => {
+      dispatch(authSlice.actions.resetPasswordSuccess(res.data));
+    })
+    .catch((error) => {
+      dispatch(
+        authSlice.actions.resetPasswordFailed(error.response.data.message)
+      );
+    });
 };
 
 export const updatePassword = (data) => async (dispatch) => {
   dispatch(authSlice.actions.updatePasswordRequest());
-  try {
-    const response = await api.put('/v1/auth/password/update', data);
-    dispatch(authSlice.actions.updatePasswordSuccess(response.data.message));
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 
-                        'Password update failed';
-    dispatch(authSlice.actions.updatePasswordFailed(errorMessage));
-  }
+  await axios
+    .put(`${BASE_URL}/api/v1/auth/password/update`, data, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res) => {
+      dispatch(authSlice.actions.updatePasswordSuccess(res.data.message));
+    })
+    .catch((error) => {
+      dispatch(
+        authSlice.actions.updatePasswordFailed(error.response.data.message)
+      );
+    });
 };
 
-// Keep all other exports the same
-export const { resetAuthSlice } = authSlice.actions;
 export default authSlice.reducer;
