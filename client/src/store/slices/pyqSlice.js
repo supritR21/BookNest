@@ -24,7 +24,7 @@ const pyqSlice = createSlice({
 export const fetchAllPYQs = () => async (dispatch) => {
   dispatch(pyqSlice.actions.fetchPYQsRequest());
   try {
-    const { data } = await axios.get(`${BASE_URL}/v1/pyq/all`, { withCredentials: true });
+    const { data } = await axios.get(`${BASE_URL}/api/v1/pyq/all`, { withCredentials: true });
     dispatch(pyqSlice.actions.fetchPYQsSuccess(data.pyqs));
   } catch (error) {
     dispatch(pyqSlice.actions.fetchPYQsFailed(error.response.data.message));

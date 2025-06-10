@@ -10,9 +10,10 @@ export default defineConfig({
     port: 5173,
     open: true,
     cors: true,
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, 'certs/key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, 'certs/cert.pem'))
-    }
-  }
+    https: false,
+    // https: {
+    //   key: fs.readFileSync(path.resolve(__dirname, 'certs/key.pem')),
+    //   cert: fs.readFileSync(path.resolve(__dirname, 'certs/cert.pem'))
+    // }
+  },
 });
