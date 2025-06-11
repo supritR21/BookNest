@@ -13,6 +13,13 @@ import userRouter from "./routes/userRouter.js";
 import expressFileupload from "express-fileupload";
 import { notifyUsers } from './services/notifyUsers.js';
 import { removeUnverifiedAccounts } from './services/removeUnverifiedAccounts.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize app
 export const app = express();
@@ -30,9 +37,7 @@ app.use(cookieParser());
 const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
-      process.env.FRONTEND_URL,
-      'https://booknest1.onrender.com',
-      'http://booknest1.onrender.com'
+      "http://localhost:5173",
     ];
     
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -78,6 +83,9 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/book", bookRouter);
 app.use("/api/v1/borrow", borrowRouter);
 app.use("/api/v1/user", userRouter);
+// app.use('/api/v1/pyq', pyqRoutes);
+
+
 
 // Health Check Endpoint
 app.get('/health', (req, res) => {

@@ -1,0 +1,31 @@
+
+
+services:
+  backend:
+    build: ./server
+    ports:
+      - "3500:3500"
+    env_file:
+      - ./server/config/config.env
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3500
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
