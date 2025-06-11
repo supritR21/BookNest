@@ -38,6 +38,7 @@ const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
       "http://localhost:5173",
+      "https://booknest-3-orzs.onrender.com",
     ];
     
     // Allow requests with no origin (like mobile apps or curl requests)
