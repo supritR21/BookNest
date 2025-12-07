@@ -4,10 +4,6 @@ BookNest is an E-Library Management System developed by Suprit Raj. It provides 
 
 ---
 
-## 🎥 Demo Video
-[Watch the Demo](https://www.youtube.com/watch?v=WhED8HR-Lnk)
-
----
 
 ## 🚀 Project Description
 
